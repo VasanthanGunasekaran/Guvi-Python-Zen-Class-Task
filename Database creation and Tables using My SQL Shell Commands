@@ -1,0 +1,239 @@
+Task 8
+--------
+Using MySQL, design a database whose name is IMDB. Create proper MySQL tables, Primary
+Key, Foreign Key, add data into the MySQL tables and do the following as given below :-
+
+1) 1. Movie should have multiple media(Video or Image)
+2) 2. Movie can belongs to multiple Genre
+3) 3. Movie can have multiple reviews and Review can belongs to a user
+4) 4. Artist can have multiple skills
+5) 5. Artist can perform multiple role in a single film
+
+Copyright (c) 2016, 2024, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > \sql
+Switching to SQL mode... Commands end with ;
+ MySQL  SQL > show databses;
+ERROR: Not connected.
+ MySQL  SQL > \connect root@localhost:3306
+Creating a session to 'root@localhost:3306'
+Please provide the password for 'root@localhost:3306': **********
+Save password for 'root@localhost:3306'? [Y]es/[N]o/Ne[v]er (default No): n
+Fetching global names for auto-completion... Press ^C to stop.
+Your MySQL connection id is 47
+Server version: 8.0.37 MySQL Community Server - GPL
+No default schema selected; type \use <schema> to set one.
+ MySQL  localhost:3306 ssl  SQL > show databases;
++--------------------+
+| Database           |
++--------------------+
+| companydb          |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+7 rows in set (0.0497 sec)
+ MySQL  localhost:3306 ssl  SQL >
+ 
+CREATE DATABASE IMDB;
+USE IMDB;
+
+ MySQL  localhost:3306 ssl  imdb  SQL >
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE Movies (
+                                     ->     movie_id INT AUTO_INCREMENT PRIMARY KEY,
+                                     ->     title VARCHAR(255) NOT NULL,
+                                     ->     release_year INT,
+                                     ->     duration INT
+                                     -> );
+Query OK, 0 rows affected (0.0503 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE Media (
+                                     ->     media_id INT AUTO_INCREMENT PRIMARY KEY,
+                                     ->     movie_id INT,
+                                     ->     media_type ENUM('Video', 'Image'),
+                                     ->     url VARCHAR(255),
+                                     ->     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE
+                                     -> );
+Query OK, 0 rows affected (0.1158 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE Genres (
+                                     ->     genre_id INT AUTO_INCREMENT PRIMARY KEY,
+                                     ->     name VARCHAR(255) NOT NULL
+                                     -> );
+Query OK, 0 rows affected (0.0278 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE MovieGenres (
+                                     ->     movie_id INT,
+                                     ->     genre_id INT,
+                                     ->     PRIMARY KEY (movie_id, genre_id),
+                                     ->     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE,
+                                     ->     FOREIGN KEY (genre_id) REFERENCES Genres(genre_id) ON DELETE CASCADE
+                                     -> );
+Query OK, 0 rows affected (0.0630 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE Users (
+                                     ->     user_id INT AUTO_INCREMENT PRIMARY KEY,
+                                     ->     username VARCHAR(255) NOT NULL,
+                                     ->     email VARCHAR(255)
+                                     -> );
+Query OK, 0 rows affected (0.0459 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE Reviews (
+                                     ->     review_id INT AUTO_INCREMENT PRIMARY KEY,
+                                     ->     movie_id INT,
+                                     ->     user_id INT,
+                                     ->     rating INT,
+                                     ->     review_text TEXT,
+                                     ->     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE,
+                                     ->     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+                                     -> );
+Query OK, 0 rows affected (0.0938 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE Artists (
+                                     ->     artist_id INT AUTO_INCREMENT PRIMARY KEY,
+                                     ->     name VARCHAR(255) NOT NULL,
+                                     ->     skills VARCHAR(255) -- Comma-separated list of skills
+                                     -> );
+Query OK, 0 rows affected (0.0502 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > CREATE TABLE MovieRoles (
+                                     ->     movie_role_id INT AUTO_INCREMENT PRIMARY KEY,
+                                     ->     movie_id INT,
+                                     ->     artist_id INT,
+                                     ->     role VARCHAR(255), -- Role name
+                                     ->     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE,
+                                     ->     FOREIGN KEY (artist_id) REFERENCES Artists(artist_id) ON DELETE CASCADE
+                                     -> );
+Query OK, 0 rows affected (0.0796 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO Movies (title, release_year, duration) VALUES
+                                     -> ('Inception', 2010, 148),
+                                     -> ('The Matrix', 1999, 136);
+Query OK, 2 rows affected (0.0076 sec)
+
+Records: 2  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO Media (movie_id, media_type, url) VALUES
+                                     -> (1, 'Video', 'https://www.youtube.com/watch?v=66TuSJo4dZM'),
+                                     ->
+                                     -> (1, 'Image', 'https://www.imdb.com/title/tt1375666/mediaviewer/rm3426651392/?ref_=tt_ov_i'),
+                                     ->
+                                     -> (2, 'Video', 'https://www.youtube.com/watch?v=GZ4GPOSQ6-g'),
+                                     ->
+                                     -> (2, 'Image', 'https://www.imdb.com/title/tt10838180/mediaviewer/rm3704744193/?ref_=tt_ov_i');
+
+Query OK, 4 rows affected (0.0123 sec)
+
+Records: 4  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO Genres (name) VALUES
+                                     -> ('Action'),
+                                     -> ('Sci-Fi');
+Query OK, 2 rows affected (0.0276 sec)
+
+Records: 2  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO MovieGenres (movie_id, genre_id) VALUES
+                                     -> (1, 1),
+                                     -> (1, 2),
+                                     -> (2, 1),
+                                     -> (2, 2);
+Query OK, 4 rows affected (0.0275 sec)
+
+Records: 4  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO Users (username, email) VALUES
+                                     -> ('john_doe', 'john@example.com'),
+                                     -> ('jane_smith', 'jane@example.com');
+Query OK, 2 rows affected (0.0301 sec)
+
+Records: 2  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO Reviews (movie_id, user_id, rating, review_text) VALUES
+                                     -> (1, 1, 9, 'Amazing movie with a complex plot!'),
+                                     -> (2, 2, 8, 'Great action and mind-bending storyline.');
+Query OK, 2 rows affected (0.0053 sec)
+
+Records: 2  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO Artists (name, skills) VALUES
+                                     -> ('Leonardo DiCaprio', 'Acting'),
+                                     -> ('Keanu Reeves', 'Acting, Stunt Performing');
+Query OK, 2 rows affected (0.0279 sec)
+
+Records: 2  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > INSERT INTO MovieRoles (movie_id, artist_id, role) VALUES
+                                     -> (1, 1, 'Lead Actor'),
+                                     -> (2, 2, 'Lead Actor'),
+                                     -> (2, 2, 'Stunt Double');
+Query OK, 3 rows affected (0.0297 sec)
+
+Records: 3  Duplicates: 0  Warnings: 0
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from Movies;
++----------+------------+--------------+----------+
+| movie_id | title      | release_year | duration |
++----------+------------+--------------+----------+
+|        1 | Inception  |         2010 |      148 |
+|        2 | The Matrix |         1999 |      136 |
++----------+------------+--------------+----------+
+2 rows in set (0.0013 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from MovieRoles;
++---------------+----------+-----------+--------------+
+| movie_role_id | movie_id | artist_id | role         |
++---------------+----------+-----------+--------------+
+|             1 |        1 |         1 | Lead Actor   |
+|             2 |        2 |         2 | Lead Actor   |
+|             3 |        2 |         2 | Stunt Double |
++---------------+----------+-----------+--------------+
+3 rows in set (0.0016 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from Artists;
++-----------+-------------------+--------------------------+
+| artist_id | name              | skills                   |
++-----------+-------------------+--------------------------+
+|         1 | Leonardo DiCaprio | Acting                   |
+|         2 | Keanu Reeves      | Acting, Stunt Performing |
++-----------+-------------------+--------------------------+
+2 rows in set (0.0017 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from Reviews;
++-----------+----------+---------+--------+------------------------------------------+
+| review_id | movie_id | user_id | rating | review_text                              |
++-----------+----------+---------+--------+------------------------------------------+
+|         1 |        1 |       1 |      9 | Amazing movie with a complex plot!       |
+|         2 |        2 |       2 |      8 | Great action and mind-bending storyline. |
++-----------+----------+---------+--------+------------------------------------------+
+2 rows in set (0.0016 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from Users;
++---------+------------+------------------+
+| user_id | username   | email            |
++---------+------------+------------------+
+|       1 | john_doe   | john@example.com |
+|       2 | jane_smith | jane@example.com |
++---------+------------+------------------+
+2 rows in set (0.0010 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from MovieGenres;
++----------+----------+
+| movie_id | genre_id |
++----------+----------+
+|        1 |        1 |
+|        2 |        1 |
+|        1 |        2 |
+|        2 |        2 |
++----------+----------+
+4 rows in set (0.0009 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from Genres;
++----------+--------+
+| genre_id | name   |
++----------+--------+
+|        1 | Action |
+|        2 | Sci-Fi |
++----------+--------+
+2 rows in set (0.0013 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from Media;
++----------+----------+------------+------------------------------------------------------------------------------+
+| media_id | movie_id | media_type | url                                                                          |
++----------+----------+------------+------------------------------------------------------------------------------+
+|        1 |        1 | Video      | https://www.youtube.com/watch?v=66TuSJo4dZM                                  |
+|        2 |        1 | Image      | https://www.imdb.com/title/tt1375666/mediaviewer/rm3426651392/?ref_=tt_ov_i  |
+|        3 |        2 | Video      | https://www.youtube.com/watch?v=GZ4GPOSQ6-g                                  |
+|        4 |        2 | Image      | https://www.imdb.com/title/tt10838180/mediaviewer/rm3704744193/?ref_=tt_ov_i |
++----------+----------+------------+------------------------------------------------------------------------------+
+4 rows in set (0.0011 sec)
+ MySQL  localhost:3306 ssl  imdb  SQL > select * from Movies;
+
+
+
+
+
+
